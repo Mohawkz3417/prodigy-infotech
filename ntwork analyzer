@@ -1,0 +1,54 @@
+from scapy.all import sniff
+from scapy.layers.inet import IP, TCP, UDP, ICMP
+
+def packet_callback(packet):
+    """
+    Callback function to process captured packets.
+    """
+    if IP in packet:
+        ip_layer = packet[IP]
+        src_ip = ip_layer.src
+        dst_ip = ip_layer.dst
+        protocol = ip_layer.proto
+
+        print(f"\n[+] Packet Captured:")
+        print(f"    Source IP: {src_ip}")
+        print(f"    Destination IP: {dst_ip}")
+
+        # Determine the protocol
+        if protocol == 6:  # TCP
+            print("    Protocol: TCP")
+            if TCP in packet:
+                tcp_layer = packet[TCP]
+                print(f"    Source Port: {tcp_layer.sport}")
+                print(f"    Destination Port: {tcp_layer.dport}")
+        elif protocol == 17:  # UDP
+            print("    Protocol: UDP")
+            if UDP in packet:
+                udp_layer = packet[UDP]
+                print(f"    Source Port: {udp_layer.sport}")
+                print(f"    Destination Port: {udp_layer.dport}")
+        elif protocol == 1:  # ICMP
+            print("    Protocol: ICMP")
+        else:
+            print("    Protocol: Other")
+
+        # Display payload data if available
+        payload = bytes(packet[IP].payload)
+        if payload:
+            print(f"    Payload: {payload[:50]}{'...' if len(payload) > 50 else ''}")
+    else:
+        print("\n[+] Non-IP Packet Captured")
+
+def main():
+    print("Packet Sniffer Tool")
+    print("Listening for packets... Press Ctrl+C to stop.")
+
+    # Start sniffing
+    try:
+        sniff(prn=packet_callback, filter="ip", store=0)
+    except KeyboardInterrupt:
+        print("\nPacket sniffing stopped. Exiting program.")
+
+if __name__ == "__main__":
+    main()
